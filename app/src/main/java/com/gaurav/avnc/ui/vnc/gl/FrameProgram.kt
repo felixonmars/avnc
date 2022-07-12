@@ -9,6 +9,7 @@
 package com.gaurav.avnc.ui.vnc.gl
 
 import android.opengl.GLES20.*
+import android.os.SystemClock
 import android.util.Log
 
 /**
@@ -34,6 +35,7 @@ class FrameProgram {
     val uProjectionLocation = glGetUniformLocation(program, U_PROJECTION)
     val uTexUnitLocation = glGetUniformLocation(program, U_TEXTURE_UNIT)
     val textureId = createTexture()
+    var lastValidationTime = 0L
 
 
     fun setUniforms(projectionMatrix: FloatArray) {
@@ -56,6 +58,14 @@ class FrameProgram {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
         glBindTexture(GL_TEXTURE_2D, 0)
         return texturesObjects[0]
+    }
+
+    fun validateProgram() {
+        val now = SystemClock.uptimeMillis() / 1000
+        if (now - lastValidationTime >= 3) {
+            lastValidationTime = now
+            ShaderCompiler.validateProgram(program)
+        }
     }
 
     fun useProgram() {
